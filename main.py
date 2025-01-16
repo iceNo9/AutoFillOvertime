@@ -139,6 +139,7 @@ def main(rv_data, rv_type):
         # chrome_options.add_argument("--headless")  # 如果你需要无头模式，可以取消注释这一行
 
         # 启动 Chrome 浏览器
+        print("请等待页面加载,完成登录与跳转")
         driver = webdriver.Chrome(service=service, options=chrome_options)
 
         # 添加反自动化检测处理
@@ -220,8 +221,8 @@ def main(rv_data, rv_type):
                 # input("新增条目结束，按Enter继续...")
 
                 parent_element = driver.find_element(By.CSS_SELECTOR, f"#oTable0 > tbody > tr:nth-child({row_index})")
-                print(parent_element.get_attribute("class"))
-                print(parent_element.get_attribute("data-rowindex"))
+                # print(parent_element.get_attribute("class"))
+                # print(parent_element.get_attribute("data-rowindex"))
 
                 while True:
                     if (2 == len(date_elements)) and (2 == len(time_elements)):
@@ -243,39 +244,47 @@ def main(rv_data, rv_type):
 
                 # 日期
                 driver.execute_script("arguments[0].click();", start_date_element)
+                time.sleep(0.05)
 
                 # 输入日期后回车
                 element = driver.find_element(By.CSS_SELECTOR, f"body > div:nth-child({item_index}) > div > div > div > div:nth-child(1) > div:nth-child(2) > input") 
                 item_index = item_index + 1
                 driver.execute_script(f"arguments[0].value = '{data['加班开始日期']}';", element)
                 element.send_keys(Keys.ENTER)
+                time.sleep(0.05)
 
                 # 起始时间
                 driver.execute_script("arguments[0].click();", start_time_element)
+                time.sleep(0.05)
 
                 # 输入起始时间后回车
                 element = driver.find_element(By.CSS_SELECTOR, f"body > div:nth-child({item_index}) > div > div > div > div.ant-time-picker-panel-input-wrap > input") 
                 item_index = item_index + 1
                 driver.execute_script(f"arguments[0].value = '{data['加班开始时间']}';", element)
                 element.send_keys(Keys.ENTER)
+                time.sleep(0.05)
 
                 # 结束时间
                 driver.execute_script("arguments[0].click();", end_time_element)
+                time.sleep(0.05)
 
                 # 输入结束时间后回车
                 element = driver.find_element(By.CSS_SELECTOR, f"body > div:nth-child({item_index}) > div > div > div > div.ant-time-picker-panel-input-wrap > input") 
                 item_index = item_index + 1
                 driver.execute_script(f"arguments[0].value = '{data['加班结束时间']}';", element)
                 element.send_keys(Keys.ENTER)
+                time.sleep(0.05)
 
                 # 输入详细后回车
                 element = driver.find_element(By.CSS_SELECTOR, f"#oTable0 > tbody > tr:nth-child({row_index}) > td:nth-child({detail_index}) > div > div > input") 
-                driver.execute_script(f"arguments[0].value = '{data['加班原因']}';", element)
-                driver.execute_script("arguments[0].click();", element)
+                if data['加班原因']:  # 判断 data['加班原因'] 是否为 None 或者 空字符串
+                    driver.execute_script(f"arguments[0].value = '{data['加班原因']}';", element)
+                    driver.execute_script("arguments[0].click();", element)
 
                 row_index = row_index + 1
+                time.sleep(0.05)
 
-            print("数据填充完成")
+            input("数据填充完成,输入Enter返回菜单")
 
     except Exception as e:
         print(f"异常：{e}")
