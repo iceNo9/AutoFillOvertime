@@ -278,8 +278,8 @@ def main(rv_data, rv_type):
                 # 输入详细后回车
                 element = driver.find_element(By.CSS_SELECTOR, f"#oTable0 > tbody > tr:nth-child({row_index}) > td:nth-child({detail_index}) > div > div > input") 
                 if data['加班原因']:  # 判断 data['加班原因'] 是否为 None 或者 空字符串
-                    driver.execute_script(f"arguments[0].value = '{data['加班原因']}';", element)
                     driver.execute_script("arguments[0].click();", element)
+                    element.send_keys(data['加班原因'])
 
                 row_index = row_index + 1
                 time.sleep(0.05)
