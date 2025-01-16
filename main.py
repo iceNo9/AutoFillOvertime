@@ -102,29 +102,40 @@ def read_overtime_data(file_path):
 
     return overtime_data
 
-def main(file_path):
+def main(rv_data, rv_type):
     try:
         # 获取当前目录
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        print(f"当前目录: {current_dir}")
+        # print(f"当前目录: {current_dir}")
 
         # 拼接 Chrome 浏览器路径
         chrome_path = os.path.join(current_dir, 'chrome-win64', 'chrome.exe')
-        print(f"Chrome路径: {chrome_path}")
 
+        # 拼接 ChromeDriver 路径
         driver_path = os.path.join(current_dir, 'chromedriver-win64', 'chromedriver.exe')
+
+        # 检查 Chrome 浏览器路径是否存在
+        if not os.path.exists(chrome_path):
+            raise(f"错误: Chrome 浏览器未找到，请检查路径: {chrome_path}")
+
+        # 检查 ChromeDriver 路径是否存在
+        if not os.path.exists(driver_path):
+            raise(f"错误: ChromeDriver 未找到，请检查路径: {driver_path}")
+
         service = Service(driver_path)
         
         # 设置 Chrome 浏览器选项
         chrome_options = Options()
         chrome_options.binary_location = chrome_path
-        chrome_options.add_argument("--ignore-certificate-errors")
+        chrome_options.add_argument("--ignore-certificate-errors")  # 忽略证书错误        
         chrome_options.add_argument("--disable-web-security")
         chrome_options.add_argument("--allow-insecure-localhost")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--disable-setuid-sandbox")
+        chrome_options.add_argument("--disable-geolocation")  # 禁用地理位置
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")  # 禁用浏览器自动化标志
+        chrome_options.add_argument("--log-level=3")  # 只显示严重错误
         # chrome_options.add_argument("--headless")  # 如果你需要无头模式，可以取消注释这一行
 
         # 启动 Chrome 浏览器
@@ -145,69 +156,52 @@ def main(file_path):
 
         # 打开网页
         driver.get('http://10.10.0.20')  # 替换为你需要访问的 URL
-
-        dynamic_string_prompt("打开HR41流程界面后，按Enter继续")
-
-        # 获取全部窗口句柄
-        window_handles= driver.window_handles
-
-        # 标志，是否找到目标标签
-        found = False
-
-        # 遍历所有标签页，找到标题包含 "HR41" 的标签
-        for handle in window_handles:
-            driver.switch_to.window(handle)  # 切换到当前标签页
-            if "HR41" in driver.title:  # 检查标签的标题
-                print(f"切换到标签：{driver.title}")
-                found = True
-                break  # 找到后就退出循环
-
-        if not found:
-            print("没有找到带有 'HR41' 的标签页 即将退出！")
-            driver.quit()  # 关闭浏览器
-            sys.exit("程序退出：未找到目标标签页！")  # 退出程序
-
-        # 读取文件，显示加班数据
-        overtime_data = read_overtime_data(file_path)
+             
 
         while True:
+
+            input("请确认HR41流程页面已打开且只存在一个该标签,输入Enter继续")
+            
+            found = False # 标志，是否找到目标标签            
+            window_handles= driver.window_handles # 获取全部窗口句柄
+            # 遍历所有标签页，找到标题包含 "HR41" 的标签
+            for handle in window_handles:
+                driver.switch_to.window(handle)  # 切换到当前标签页
+                if "HR41" in driver.title:  # 检查标签的标题
+                    print(f"切换到标签：{driver.title}")
+                    found = True
+                    break  # 找到后就退出循环
+
+            if not found:
+                raise("没有找到带有 'HR41' 的标签页 即将退出！")
+            
             # 提示信息
             print("****菜单选项****：")
             print("1. 普通加班")
             print("2. 公休加班")
             print("3. 节日加班")
             print("4. 退出")
+            
+            while True:
+                user_input = input("请输入数字：") # 用户输入
 
-            # 遍历加班数据字典，检查每种加班类型的数量
-            available_types = []
-            if len(overtime_data['普通加班']) > 0:
-                available_types.append('1')
-                print(f"普通加班：{len(overtime_data['普通加班'])} 条")
-            if len(overtime_data['公休加班']) > 0:
-                available_types.append('2')
-                print(f"公休加班：{len(overtime_data['公休加班'])} 条")
-            if len(overtime_data['节日加班']) > 0:
-                available_types.append('3')
-                print(f"节日加班：{len(overtime_data['节日加班'])} 条")
-
-            # 用户输入
-            user_input = input("请输入数字：")
-
-            # 处理用户输入
-            if user_input == '1' and '1' in available_types:
-                list_data = overtime_data['普通加班']
-                pass
-            elif user_input == '2' and '2' in available_types:
-                list_data = overtime_data['公休加班']
-                pass
-            elif user_input == '3' and '3' in available_types:
-                list_data = overtime_data['节日加班']
-                pass
-            elif user_input == '4' and '4' in available_types:
-                break
-            else:
-                print("输入错误或没有可用的加班类型，请检查并重新输入。")
-                continue
+                # 处理用户输入
+                if user_input == '1' and '1' in available_types:
+                    list_data = overtime_data['普通加班']
+                    break
+                elif user_input == '2' and '2' in available_types:
+                    list_data = overtime_data['公休加班']
+                    break
+                elif user_input == '3' and '3' in available_types:
+                    list_data = overtime_data['节日加班']
+                    break
+                elif user_input == '4' and '4' in available_types:
+                    # 关闭浏览器
+                    driver.quit()
+                    sys.exit()
+                else:
+                    print("输入错误或没有可用的加班类型，请检查并重新输入。")
+                    continue            
             
             element_add = driver.find_element(By.CSS_SELECTOR, "#addbutton0")  # 替换为实际按钮的选择器
             # input("新增按钮定位完成，按Enter继续...")
@@ -281,25 +275,46 @@ def main(file_path):
 
                 row_index = row_index + 1
 
-            dynamic_string_prompt("输入完成，按Enter回到菜单...")
-
-        # 关闭浏览器
-        driver.quit()
+            print("数据填充完成")
 
     except Exception as e:
         print(f"异常：{e}")
 
+        # 关闭浏览器
+        driver.quit()
+        sys.exit()
+
 if __name__ == "__main__":
     VER = "V1.0-"
-    DATE = "20250115"    
+    DATE = "20250116"    
     commit_message = "feea:初版作成，支持HR41加班单自动填充；"
 
     print(f"版本: {VER}{DATE}")
     print("版本修改说明: " + commit_message)
 
-    # 从命令行获取文件路径
+    # 获取文件路径
     if len(sys.argv) > 1:
-        file_path = sys.argv[1]  # 获取传入的文件路径
-        main(file_path)
+        file_path = sys.argv[1]  # 获取传入的文件路径        
     else:
-        print("请提供文件路径参数。")
+        file_path = input("请将xlsx文件拖动到控制台,按Enter继续:")
+
+    # 读取文件，显示加班数据
+    overtime_data = read_overtime_data(file_path)
+    available_types = []
+
+    if len(overtime_data):
+        print("数据解析完毕:")
+        if len(overtime_data['普通加班']) > 0:
+            available_types.append('1')
+            print(f"普通加班：{len(overtime_data['普通加班'])} 条")
+        if len(overtime_data['公休加班']) > 0:
+            available_types.append('2')
+            print(f"公休加班：{len(overtime_data['公休加班'])} 条")
+        if len(overtime_data['节日加班']) > 0:
+            available_types.append('3')
+            print(f"节日加班：{len(overtime_data['节日加班'])} 条")
+    else:
+        print("无加班数据，即将退出")
+        sys.exit()
+
+    main(overtime_data, available_types)
