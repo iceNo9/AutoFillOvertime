@@ -294,11 +294,11 @@ def main(rv_data, rv_type):
         sys.exit()
 
 if __name__ == "__main__":
-    VER = "V1.0-"
+    VER = "V1.0"
     DATE = "20250116"    
     commit_message = "feea:初版作成，支持HR41加班单自动填充；"
 
-    print(f"版本: {VER}{DATE}")
+    print(f"版本: {VER}-{DATE}")
     print("版本修改说明: " + commit_message)
 
     # 获取文件路径
