@@ -38,11 +38,11 @@ def read_overtime_data(file_path):
     # 读取 Excel 文件
     wb = openpyxl.load_workbook(file_path)
     
-    # 获取名为 "detail" 的工作表
-    if 'detail' in wb.sheetnames:
-        sheet = wb['detail']
+    # 获取名为 "考勤详细" 的工作表
+    if '考勤详细' in wb.sheetnames:
+        sheet = wb['考勤详细']
     else:
-        print("没有找到名为 'detail' 的工作表！")
+        print("没有找到名为 '考勤详细' 的工作表！")
         return None
 
     # 字典，用于存储不同类型的加班数据
@@ -294,9 +294,9 @@ def main(rv_data, rv_type):
         sys.exit()
 
 if __name__ == "__main__":
-    VER = "V1.0"
+    VER = "V1.0.1"
     DATE = "20250116"    
-    commit_message = "feea:初版作成，支持HR41加班单自动填充；"
+    commit_message = "支持HR41加班单自动填充,适配AttAnalysis_v3.0.0；"
 
     print(f"版本: {VER}-{DATE}")
     print("版本修改说明: " + commit_message)
@@ -327,3 +327,5 @@ if __name__ == "__main__":
         sys.exit()
 
     main(overtime_data, available_types)
+
+   
